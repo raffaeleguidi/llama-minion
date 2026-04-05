@@ -1,0 +1,33 @@
+services:
+  llama-minion:
+    build: .
+    container_name: llama-minion
+    image: raffaeleguidi/llama-minion:qwen
+    # volumes:
+    #   - ./models:/models:Z
+    ports:
+      - "8080:8080"
+    environment:
+      - THREADS=2
+      # - CTX_SIZE=2048
+      - CTX_SIZE=32000
+      # - MODEL_FILE=Phi-4-mini-instruct-Q4_K_M.gguf
+      - MODEL_FILE=Qwen2.5-3B-Instruct-Q4_K_M.gguf
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 4G
+    restart: unless-stopped
+  mcp-weather:
+    image: node:20-slim
+    container_name: mcp-weather
+    ports:
+      - "3003:3001"
+    environment:
+      # Alcuni server meteo richiedono una API Key (es. OpenWeather)
+      # Se usi quello demo di @modelcontextprotocol, spesso è integrato
+      - OPENWEATHER_API_KEY=tuo_token_se_necessario
+    command: >
+      sh -c "npx -y @modelcontextprotocol/server-everything sse"
+    restart: always
